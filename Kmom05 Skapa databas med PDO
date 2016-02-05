@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href="style.css" rel="stylesheet">
+
+<?php
+// Create a DSN for the database using its filename
+$fileName = __DIR__ . "/bohn/jetty1.sqlite";
+$dsn = "sqlite:$fileName";
+
+// Open the database file and cath the exception if it fails.
+try {
+    $bohn = new PDO($dsn);
+    $bohn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo "Failed to connect to the database using DSN:<br>$dsn<br>";
+    throw $e;
+}
+
+// Prepare the SQL statement to drop the table
+echo "<p>Prepare to drop the table, if it exists.</p>";
+$sql = <<<EOD
+DROP TABLE IF EXISTS "Jetty";
+EOD;
+$stmt = $bohn->prepare($sql);
+$stmt->execute();
+
+// Prepare the SQL statement to create the table
+echo "<p>Prepare to create the table.</p>";
+$sql = <<<EOD
+CREATE TABLE "main"."Jetty" (
+    "jettyPosition" INTEGER PRIMARY KEY NOT NULL UNIQUE,
+    "boatType" VARCHAR(20) NOT NULL,
+    "boatEngine" VARCHAR(20) NOT NULL,
+    "boatLength" INTEGER,
+    "boatWidth" INTEGER,
+    "ownerName" VARCHAR(20)
+)
+EOD;
+$stmt = $bohn->prepare($sql);
+$stmt->execute();
+
+// Prepare SQL statement to INSERT new rows into table
+echo "<p>Prepare to insert into the table.</p>";
+$sql = <<<EOD
+INSERT INTO "Jetty" VALUES(?, ?, ?, ?, ?, ?);
+EOD;
+$stmt = $bohn->prepare($sql);
+
+// Insert each row.
+echo "<p>Inserting rows into the table.</p>";
+$params = [1,'Buster XXL', 'Tamaha 115hk', 635,240,'John'];
+$stmt->execute($params);
+
+$params = [2,'Bella Nuo', 'Marine 135hk',750,280,'Oskar'];
+$stmt->execute($params);
+
+$prams = [3,'Firebreath', 'Glowmotor', 900,350,'Micke'];
+$stmt->execute($params);
